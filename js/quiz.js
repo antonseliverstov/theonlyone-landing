@@ -138,11 +138,18 @@
   const section = document.getElementById("quiz");
   const root = document.getElementById("quiz-root");
   const headerH = () => (document.querySelector(".hdr") || {}).offsetHeight || 0;
-  // Плавная прокрутка к элементу; если браузер её прервал или не успел, через 1,4 с ставим элемент на место сразу.
+  // Плавная прокрутка к элементу. Если браузер её не выполнил, через 1,4 с ставим элемент на место сразу,
+  // но только когда человек за это время сам не листал и не нажимал клавиши.
   function goTo(el) {
     if (!el) return;
     el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    let moved = false;
+    const stop = () => { moved = true; };
+    const evs = ["touchstart", "wheel", "keydown"];
+    evs.forEach(n => window.addEventListener(n, stop, { passive: true }));
     setTimeout(() => {
+      evs.forEach(n => window.removeEventListener(n, stop));
+      if (moved) return;
       const t = el.getBoundingClientRect().top;
       if (t < 0 || t > window.innerHeight * 0.6) el.scrollIntoView({ block: "start", behavior: "instant" });
     }, 1400);
@@ -305,7 +312,7 @@
     const bridge = R.sizeOut
       ? `<section class="qz-bridge"><h4 class="qz-h3">Подберём модели вашего размера</h4><p class="qz-text">Сейчас в шоуруме размеры до ${CONFIG.maxSizeInStock}. Оставьте контакт — напишем, когда появятся вещи вашего размера.</p></section>`
       : `<section class="qz-bridge"><p class="qz-text">Тип показывает направление. Какие оттенки и фасоны идут именно вам, стилист покажет вживую, при дневном свете.</p>
-          <h4 class="qz-h3">Что вам идёт сейчас — за 90 минут</h4>
+          <h4 class="qz-h3">Бесплатный шоппинг с ТОП стилистом</h4>
           <p class="qz-text">Личная встреча со стилистом в шоуруме на Казакова, 29. 1 990 ₽ целиком идут в зачёт покупки, покупать не обязательно.</p>
           <a class="btn" href="#form" data-q="book">Записаться к стилисту</a></section>`;
     return `<div class="qz-screen qz-res">
@@ -324,10 +331,12 @@
 
   function render(focus = true) {
     root.innerHTML = state.screen === "q" ? vQuestion() : state.screen === "result" ? vResult() : vIntro();
+    // новый экран проявляется (класс is-enter); при перерисовке того же экрана анимации нет
+    root.classList.toggle("is-enter", focus);
     if (focus) {
-      // блок меняет высоту от экрана к экрану: возвращаем его верх в поле зрения, если он ушёл
+      // блок меняет высоту от экрана к экрану: если его верх ушёл, ставим его под шапку сразу, без проезда по странице
       const top = root.getBoundingClientRect().top;
-      if (top < headerH() || top > window.innerHeight * 0.4) goTo(root);
+      if (top < headerH() || top > window.innerHeight * 0.4) root.scrollIntoView({ block: "start", behavior: "instant" });
       const h = root.querySelector("[data-focus]");
       if (h) h.focus({ preventScroll: true });
     }
@@ -350,15 +359,19 @@
       const at = arr.indexOf(v);
       if (at >= 0) arr.splice(at, 1); else { arr.push(v); if (arr.length > q.multi) arr.shift(); }
       state.answers[q.id] = arr;
-      render(false);
-      const b = root.querySelector(`[data-pick="${v}"]`);
-      if (b) b.focus({ preventScroll: true });
+      markPicked(arr);
       return;
     }
     state.answers[q.id] = v;
     state.lock = true;
-    render(false);
+    markPicked([v]);
     setTimeout(() => { state.lock = false; next(); }, reduce ? 60 : 260);
+  }
+  // отмечаем выбор на месте, не перерисовывая экран: иначе фото заново грузятся и мигают
+  function markPicked(list) {
+    root.querySelectorAll("[data-pick]").forEach(b => b.setAttribute("aria-pressed", String(list.includes(b.dataset.pick))));
+    const nx = root.querySelector('[data-q="next"]');
+    if (nx) nx.disabled = !list.length;
   }
   function next() {
     const q = QUESTIONS[state.i], a = state.answers[q.id];
