@@ -135,8 +135,18 @@
   ];
 
   const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const modal = document.getElementById("quiz");
+  const section = document.getElementById("quiz");
   const root = document.getElementById("quiz-root");
+  const headerH = () => (document.querySelector(".hdr") || {}).offsetHeight || 0;
+  // Плавная прокрутка к элементу; если браузер её прервал или не успел, через 1,4 с ставим элемент на место сразу.
+  function goTo(el) {
+    if (!el) return;
+    el.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    setTimeout(() => {
+      const t = el.getBoundingClientRect().top;
+      if (t < 0 || t > window.innerHeight * 0.6) el.scrollIntoView({ block: "start", behavior: "instant" });
+    }, 1400);
+  }
   const ui = () => window.TOOUI;
   const track = (event, params) => ui() && ui().track(event, params);
   const item = n => TOO.byN[n];
@@ -196,7 +206,7 @@
     const pics = ["muse", "leader", "traveler"].map(k => `<img src="${TOO.img(item(T[k].q1))}" alt="" loading="lazy">`).join("");
     return `<div class="qz-screen qz-intro">
       <p class="label">Подбор образа</p>
-      <h2 class="qz-h" tabindex="-1" data-focus>Какой у вас стилевой тип?</h2>
+      <h3 class="qz-h" tabindex="-1" data-focus>Какой у вас стилевой тип?</h3>
       <p class="qz-lead">8 вопросов, около 90 секунд. Тип покажем сразу, а полный гид — палитру-ориентир, ещё два образа из коллекции и вещи, которые пора отпустить, — откроем, когда оставите контакт.</p>
       <div class="qz-collage" aria-hidden="true">${pics}</div>
       <button class="btn" type="button" data-q="start">Начать</button>
@@ -225,7 +235,7 @@
     return `<div class="qz-screen">
       <div class="qz-prog" role="progressbar" aria-label="Пройдено вопросов" aria-valuemin="0" aria-valuemax="${QUESTIONS.length}" aria-valuenow="${n - 1}"><span style="width:${(n - 1) / QUESTIONS.length * 100}%"></span></div>
       <div class="qz-meta"><button type="button" class="qz-back" data-q="back">← Назад</button><span>Вопрос ${n} из ${QUESTIONS.length}</span></div>
-      <h2 class="qz-h" tabindex="-1" data-focus>${q.title}</h2>
+      <h3 class="qz-h" tabindex="-1" data-focus>${q.title}</h3>
       ${q.hint ? `<p class="qz-hint">${q.hint}</p>` : ""}
       ${body}
       ${q.multi ? `<button type="button" class="btn qz-next" data-q="next"${canNext ? "" : " disabled"}>Дальше</button>` : ""}
@@ -267,7 +277,7 @@
         <button class="btn" type="submit">Открыть гид</button>
       </form>` : "";
     return `<section class="qz-gate" id="qz-gate">
-      <h3 class="qz-h3">Откройте полный гид</h3>
+      <h4 class="qz-h3">Откройте полный гид</h4>
       <p class="qz-text">Палитра-ориентир, ещё два образа из коллекции и пять вещей, которые ${M.dat} пора отпустить. Бесплатно, отписаться можно одной кнопкой.</p>
       <label class="chk"><input type="checkbox" id="qz-pd"${state.consentPd ? " checked" : ""}><span>Согласна на обработку персональных данных и с <a href="https://theonlyone1.ru/privacy" target="_blank" rel="noopener">политикой конфиденциальности</a></span></label>
       <label class="chk"><input type="checkbox" id="qz-ads"${state.consentAds ? " checked" : ""}><span>Хочу получать советы стилиста и предложения THE ONLY ONE</span></label>
@@ -293,14 +303,14 @@
       : `<section class="qz-locked"><div class="qz-blur" aria-hidden="true" inert>${guide(R)}</div>
           <div class="qz-veil"><p class="qz-veil__t">Ещё 2 образа, палитра-ориентир и 5 вещей, которые ${M.dat} пора отпустить</p><button class="btn" type="button" data-q="to-gate">Открыть полный гид</button></div></section>`;
     const bridge = R.sizeOut
-      ? `<section class="qz-bridge"><h3 class="qz-h3">Подберём модели вашего размера</h3><p class="qz-text">Сейчас в шоуруме размеры до ${CONFIG.maxSizeInStock}. Оставьте контакт — напишем, когда появятся вещи вашего размера.</p></section>`
+      ? `<section class="qz-bridge"><h4 class="qz-h3">Подберём модели вашего размера</h4><p class="qz-text">Сейчас в шоуруме размеры до ${CONFIG.maxSizeInStock}. Оставьте контакт — напишем, когда появятся вещи вашего размера.</p></section>`
       : `<section class="qz-bridge"><p class="qz-text">Тип показывает направление. Какие оттенки и фасоны идут именно вам, стилист покажет вживую, при дневном свете.</p>
-          <h3 class="qz-h3">Что вам идёт сейчас — за 90 минут</h3>
+          <h4 class="qz-h3">Что вам идёт сейчас — за 90 минут</h4>
           <p class="qz-text">Личная встреча со стилистом в шоуруме на Казакова, 29. 1 990 ₽ целиком идут в зачёт покупки, покупать не обязательно.</p>
           <a class="btn" href="#form" data-q="book">Записаться к стилисту</a></section>`;
     return `<div class="qz-screen qz-res">
       <p class="label">Ваш результат</p>
-      <h2 class="qz-h" tabindex="-1" data-focus>${title}</h2>
+      <h3 class="qz-h" tabindex="-1" data-focus>${title}</h3>
       <p class="qz-tag">${M.tag}</p>
       <p class="qz-text">${M.about}</p>
       <div class="qz-answers"><p class="qz-eyebrow">По вашим ответам</p><ul>${lines.map(l => `<li>${l}</li>`).join("")}</ul></div>
@@ -315,7 +325,9 @@
   function render(focus = true) {
     root.innerHTML = state.screen === "q" ? vQuestion() : state.screen === "result" ? vResult() : vIntro();
     if (focus) {
-      modal.querySelector(".qz").scrollTop = 0;
+      // блок меняет высоту от экрана к экрану: возвращаем его верх в поле зрения, если он ушёл
+      const top = root.getBoundingClientRect().top;
+      if (top < headerH() || top > window.innerHeight * 0.4) goTo(root);
       const h = root.querySelector("[data-focus]");
       if (h) h.focus({ preventScroll: true });
     }
@@ -384,7 +396,7 @@
     if (typeof window.TOO_SEND_LEAD === "function") window.TOO_SEND_LEAD(lead);
     render(false);
     const g = root.querySelector("#qz-guide");
-    if (g) g.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    goTo(g);
   }
   function maskPhone(input) {
     const d = input.value.replace(/\D/g, "").replace(/^[78](?=\d{10})/, "").slice(0, 10);
@@ -412,9 +424,9 @@
       case "back": back(); break;
       case "next": next(); break;
       case "restart": state = fresh(); state.screen = "q"; track("quiz_start", { from: "restart" }); render(); break;
-      case "to-gate": { const g = root.querySelector("#qz-gate"); if (g) g.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" }); break; }
+      case "to-gate": goTo(root.querySelector("#qz-gate")); break;
       case "phone": state.phoneOpen = !state.phoneOpen; render(false); { const f = root.querySelector("#qz-name"); if (f) f.focus(); } break;
-      case "book": e.preventDefault(); track("quiz_book_click", { type: state.result.main }); ui().closeModal(modal); document.getElementById("form").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); break;
+      case "book": e.preventDefault(); track("quiz_book_click", { type: state.result.main }); goTo(document.getElementById("form")); break;
     }
   });
   root.addEventListener("change", e => {
@@ -439,12 +451,22 @@
     unlock("phone", { name: root.querySelector("#qz-name").value.trim(), phone: "+7" + digits });
   });
 
+  // Квиз живёт в блоке #quiz на странице: кнопки «Подобрать образ» прокручивают к нему.
   window.TOOQuiz = {
     open(from) {
       if (state.screen === "intro") state.from = from || "page";
-      ui().openModal(modal);
       track("quiz_open", { from: from || "page" });
-      render();
+      goTo(section);
+      const target = root.querySelector('[data-q="start"]') || root.querySelector("[data-focus]");
+      if (target) setTimeout(() => target.focus({ preventScroll: true }), reduce ? 0 : 500);
     }
   };
+
+  render(false);
+  if ("IntersectionObserver" in window) {
+    const seen = new IntersectionObserver(entries => {
+      if (entries.some(e => e.isIntersecting)) { track("quiz_view", {}); seen.disconnect(); }
+    }, { threshold: 0.3 });
+    seen.observe(section);
+  }
 })();
