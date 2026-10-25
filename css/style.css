@@ -249,9 +249,10 @@ body.is-locked { overflow: hidden; }
 .cart__demo a { color: var(--terra); }
 
 /* ---------- квиз «Подобрать образ»: отдельный блок страницы ---------- */
-.quizsec { background: var(--white); padding: 105px 0; }
-.quizsec + .store { padding-top: 0; }
-.qz-card { max-width: 900px; margin: 0 auto; padding: clamp(28px, 5vw, 60px); background: var(--cream); scroll-margin-top: calc(var(--header-h) + 20px); }
+/* тёмный фон с терракотовым свечением выделяет квиз среди светлых блоков */
+.quizsec { padding: 105px 0 120px; background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(168, 92, 62, .45), transparent 70%), var(--brown); }
+.quizsec .sec-title { color: var(--cream-2); }
+.qz-card { max-width: 900px; margin: 0 auto; padding: clamp(28px, 5vw, 60px); background: var(--cream); border-top: 4px solid var(--terra); box-shadow: 0 30px 70px rgba(0, 0, 0, .35); scroll-margin-top: calc(var(--header-h) + 20px); }
 .qz-card.is-enter > .qz-screen { animation: qz-in .3s ease both; }
 @keyframes qz-in { from { opacity: 0; transform: translateY(8px); } }
 .qz-photo, .qz-opt, .card__media { -webkit-tap-highlight-color: transparent; }
@@ -371,8 +372,8 @@ body.is-locked { overflow: hidden; }
   .cart__foot { padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); }
   .ftr__in { grid-template-columns: 1fr; gap: 30px; }
   .card--promo { aspect-ratio: auto; grid-column: 1 / -1; }
-  .quizsec { padding: 70px 0; }
-  .qz-card { margin: 0 -20px; padding: 28px 20px; }
+  .quizsec { padding: 70px 0 80px; }
+  .qz-card { margin: 0 -8px; padding: 28px 16px; }
   .qz-photos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 10px; }
   .qz-photo__cap { font-size: 13px; }
   .qz-opts--2 { grid-template-columns: 1fr 1fr; }
