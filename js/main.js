@@ -31,7 +31,7 @@
       <button class="card__title" type="button" data-open="${it.n}">${it.name}</button>
       <p class="card__descr">${it.sub}</p>
       <p class="card__price">${TOO.money(it.price)}${it.old ? `<span class="card__old">${TOO.money(it.old)}</span>` : ""}</p>
-      <a class="btn btn--card card__buy" href="${TOO.vkUrl(it)}" target="_blank" rel="noopener" data-buy="${it.n}">Купить</a>
+      ${window.TOOCart ? TOOCart.button(it.n, "btn btn--card card__buy") : ""}
     </article>`;
   }
   const promo = `<div class="card card--promo">
@@ -91,7 +91,8 @@
     if (el.hidden) return;
     el.hidden = true;
     if (!$$(".modal").some(m => !m.hidden)) document.body.classList.remove("is-locked");
-    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+    // без прокрутки: иначе возврат фокуса сбивает прокрутку к квизу или каталогу, которая начинается следом
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
   }
   function openProduct(n) {
     const it = TOO.byN[n];
@@ -104,18 +105,35 @@
     $("#pm-desc").textContent = it.desc || TOO.defaultDesc;
     $("#pm-buy").href = TOO.vkUrl(it);
     $("#pm-buy").dataset.buy = it.n;
+    $("#pm-cart").dataset.cartAdd = it.n;
+    if (window.TOOCart) TOOCart.sync();
     openModal($("#product-modal"));
     track("product_view", { item: it.n, name: it.name });
   }
   let toastTimer = null;
-  function toast(msg) {
+  // action — необязательная кнопка в уведомлении: { label, run }
+  function toast(msg, action) {
     const el = $("#toast");
     el.textContent = msg;
+    if (action) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "toast__btn";
+      b.textContent = action.label;
+      b.addEventListener("click", () => { el.hidden = true; action.run(); });
+      el.append(b);
+    }
     el.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => { el.hidden = true; }, 3800);
+    toastTimer = setTimeout(() => { el.hidden = true; }, action ? 5000 : 3800);
   }
-  window.TOOUI = { openModal, closeModal, openProduct, toast, track };
+  function maskPhone(input) {
+    const d = input.value.replace(/\D/g, "").replace(/^[78](?=\d{10})/, "").slice(0, 10);
+    const p = [d.slice(0, 3), d.slice(3, 6), d.slice(6, 8), d.slice(8, 10)];
+    input.value = d.length > 3 ? `(${p[0]}) ${p[1]}${d.length > 6 ? "-" + p[2] : ""}${d.length > 8 ? "-" + p[3] : ""}` : d;
+  }
+  const closeMenu = () => { if (!mnav.hidden) setMenu(false); };
+  window.TOOUI = { openModal, closeModal, openProduct, toast, track, maskPhone, closeMenu };
 
   // ---------- меню ----------
   const burger = $(".hdr__burger");
@@ -148,8 +166,8 @@
     const quiz = t.closest("[data-quiz]");
     if (quiz) {
       e.preventDefault();
-      if (!mnav.hidden) setMenu(false);
-      closeModal($("#product-modal"));
+      closeMenu();
+      $$(".modal").forEach(closeModal);
       window.TOOQuiz && window.TOOQuiz.open(quiz.closest("section, header, footer, .modal")?.id || "page");
       return;
     }
@@ -159,6 +177,7 @@
       setTab(tabLink.dataset.tab);
     }
     if (t.closest("[data-show-fav]")) {
+      closeMenu();
       setTab("fav");
       $("#catalog").scrollIntoView({ behavior: "smooth" });
       return;
@@ -185,7 +204,7 @@
       else closeModal(close.closest(".modal"));
       return;
     }
-    if (t.classList.contains("modal") && t.id === "product-modal") closeModal(t);
+    if (t.classList.contains("modal")) closeModal(t); // клик по затемнению вокруг окна
     if (!mnav.hidden && t.closest("#mnav a")) setMenu(false);
   });
   document.addEventListener("keydown", e => {
@@ -198,11 +217,7 @@
   // ---------- форма записи ----------
   const form = $("#lead-form");
   const phoneInput = $("#lead-phone");
-  phoneInput.addEventListener("input", () => {
-    const d = phoneInput.value.replace(/\D/g, "").replace(/^[78](?=\d{10})/, "").slice(0, 10);
-    const p = [d.slice(0, 3), d.slice(3, 6), d.slice(6, 8), d.slice(8, 10)];
-    phoneInput.value = d.length > 3 ? `(${p[0]}) ${p[1]}${d.length > 6 ? "-" + p[2] : ""}${d.length > 8 ? "-" + p[3] : ""}` : d;
-  });
+  phoneInput.addEventListener("input", () => maskPhone(phoneInput));
   form.addEventListener("submit", e => {
     e.preventDefault();
     const err = $("#lead-err");

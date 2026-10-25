@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Письмо о заявке — демо</title>
+  <!-- Только для демо: показывает письмо, которое сайт собрал из последней заявки в этой вкладке. -->
+  <style>
+    body { margin: 0; background: #f7f2ec; color: #3d3630; font: 14px/1.5 Arial, Helvetica, sans-serif; }
+    .bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; padding: 14px 20px; background: #3d3630; color: #f7f2ec; }
+    .bar a { color: #f7f2ec; }
+    iframe { display: block; width: 100%; height: calc(100vh - 52px); border: 0; background: #f7f2ec; }
+    .empty { max-width: 520px; margin: 60px auto; padding: 0 20px; text-align: center; font-size: 16px; }
+    .empty a { color: #a85c3e; }
+  </style>
+</head>
+<body>
+  <div class="bar"><span id="subject">Демо: так заявка из корзины придёт на почту магазина</span><a href="./#catalog">← Вернуться на сайт</a></div>
+  <!-- без allow-scripts: скрипты в письме не выполняются -->
+  <iframe id="mail" title="Письмо магазину" sandbox="allow-same-origin allow-popups"></iframe>
+  <script>
+    (() => {
+      let order = null;
+      try { order = JSON.parse(sessionStorage.getItem("too-demo-order") || "null"); } catch (e) { /* хранилище недоступно */ }
+      const frame = document.getElementById("mail");
+      if (order && order.html) {
+        document.getElementById("subject").textContent = "Тема письма: " + order.subject;
+        frame.srcdoc = order.html;
+      } else {
+        const p = document.createElement("p");
+        p.className = "empty";
+        p.innerHTML = 'Здесь появится письмо, которое получит магазин. Сначала <a href="./#catalog">добавьте вещи в корзину</a> и отправьте заявку — в этой же вкладке.';
+        frame.replaceWith(p);
+      }
+    })();
+  </script>
+</body>
+</html>

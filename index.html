@@ -53,8 +53,8 @@
     </nav>
     <a class="hdr__logo" href="#top">THE ONLY ONE</a>
     <div class="hdr__right">
-      <button class="hdr__icon" type="button" data-show-fav aria-label="Избранное"><svg aria-hidden="true"><use href="#i-heart"/></svg><span class="hdr__count" data-fav-count hidden>0</span></button>
-      <a class="hdr__icon" href="https://vk.ru/market-209931759" target="_blank" rel="noopener" aria-label="Магазин ВКонтакте"><svg aria-hidden="true"><use href="#i-bag"/></svg></a>
+      <button class="hdr__icon hdr__fav" type="button" data-show-fav aria-label="Избранное"><svg aria-hidden="true"><use href="#i-heart"/></svg><span class="hdr__count" data-fav-count hidden>0</span></button>
+      <button class="hdr__icon" type="button" data-cart-open aria-label="Корзина"><svg aria-hidden="true"><use href="#i-bag"/></svg><span class="hdr__count" data-cart-count hidden>0</span></button>
       <button class="btn btn--sm btn--line" type="button" data-quiz>Подобрать образ</button>
       <a class="btn btn--sm" href="#form">Запись к стилисту</a>
     </div>
@@ -68,11 +68,21 @@
       <a href="#outerwear">Верхняя одежда</a>
       <a href="#tops">Топы и рубашки</a>
       <a href="#offer">Как проходит встреча</a>
-      <a href="#contacts">Контакты</a>
+      <a href="#about">О бренде</a>
+      <button type="button" data-show-fav>Избранное <span class="mnav__count" data-fav-count hidden>0</span></button>
     </nav>
     <div class="mnav__btns">
-      <button class="btn" type="button" data-quiz>Подобрать образ</button>
-      <a class="btn btn--line" href="#form">Записаться к стилисту</a>
+      <a class="btn" href="#form">Записаться к стилисту</a>
+      <button class="btn btn--line" type="button" data-quiz>Подобрать образ</button>
+    </div>
+    <div class="mnav__contacts">
+      <a class="mnav__phone" href="tel:+79672358969">+7 967 235-89-69</a>
+      <p>Москва, ул. Казакова, 29, стр. 1 · м. Курская<br>Ежедневно 10:00–21:00</p>
+      <div class="ftr__soc">
+        <a href="https://telegram.me/theonlyone_store" target="_blank" rel="noopener" aria-label="Telegram"><svg aria-hidden="true"><use href="#i-tg"/></svg></a>
+        <a href="https://wa.me/79256383133" target="_blank" rel="noopener" aria-label="WhatsApp"><svg aria-hidden="true"><use href="#i-wa"/></svg></a>
+        <a href="https://vk.ru/theonlyonestore" target="_blank" rel="noopener" aria-label="ВКонтакте"><svg aria-hidden="true"><use href="#i-vk"/></svg></a>
+      </div>
     </div>
   </div>
 </header>
@@ -215,6 +225,7 @@
       <a href="#dresses">Платья</a>
       <a href="#outerwear">Верхняя одежда</a>
       <a href="#tops">Топы и рубашки</a>
+      <a href="https://vk.ru/market-209931759" target="_blank" rel="noopener">Магазин ВКонтакте</a>
     </div>
     <div class="ftr__col">
       <p class="ftr__title">Покупателям</p>
@@ -242,18 +253,24 @@
       <p class="pm__price" id="pm-price"></p>
       <p class="pm__desc" id="pm-desc"></p>
       <div class="pm__btns">
-        <a class="btn" id="pm-buy" href="#" target="_blank" rel="noopener">Купить во ВКонтакте</a>
+        <button class="btn" id="pm-cart" type="button" data-cart-add="">В корзину</button>
         <a class="btn btn--line" href="#form" data-close>Примерить со стилистом</a>
       </div>
       <button class="pm__quiz" type="button" data-quiz>Не уверены, что подойдёт? Подобрать образ</button>
+      <a class="pm__vk" id="pm-buy" href="#" target="_blank" rel="noopener">Этот товар во ВКонтакте</a>
     </div>
   </div>
+</div>
+
+<div class="modal cart" id="cart" hidden role="dialog" aria-modal="true" aria-labelledby="cart-title">
+  <div class="cart__box" id="cart-box"></div>
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="js/data.js"></script>
 <script src="js/quiz.js"></script>
+<script src="js/cart.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
